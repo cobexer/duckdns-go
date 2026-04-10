@@ -1,12 +1,14 @@
-FROM golang:1.15-alpine3.12 as build
+ARG GOLANG_VERSION=1.26
+FROM golang:${GOLANG_VERSION}-alpine AS build
 ARG TARGETOS
 ARG TARGETARCH
 
 WORKDIR /tmp/duckdns-go
 
-RUN apk --no-cache add alpine-sdk ca-certificates
+RUN apk --no-cache add ca-certificates
+COPY go.mod go.sum ./
+RUN go mod download
 COPY . .
-RUN GO111MODULE=on go mod vendor
 RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -ldflags '-s -w' -o duckdns-go ./
 
 FROM scratch
