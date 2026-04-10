@@ -1,124 +1,95 @@
-name: Build/Push (tag)
+name: Release
 
 on:
   push:
-    tags:
-      - '*'
+    tags: ['v*']
 
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - uses: actions/setup-go@v2
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
         with:
-          go-version: 1.16
+          go-version-file: go.mod
+      - run: go test -v -cover -race ./...
 
-      - run: go get -t -v ./...
-      - run: go test -v -race ./...
-
-  build:
+  docker:
     runs-on: ubuntu-latest
     needs: test
+    permissions:
+      contents: read
+      packages: write
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
+      - uses: actions/checkout@v4
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Extract Go version from go.mod
+        id: goversion
+        run: echo "version=$(grep '^go ' go.mod | cut -d' ' -f2 | cut -d'.' -f1,2)" >> $GITHUB_OUTPUT
+      - uses: docker/metadata-action@v5
+        id: meta
+        with:
+          images: ghcr.io/cobexer/duckdns-go
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          platforms: linux/386,linux/amd64,linux/arm/v7,linux/arm64
+          build-args: GOLANG_VERSION=${{ steps.goversion.outputs.version }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
 
-    - name: Set up QEMU
-      uses: docker/setup-qemu-action@v1
-    
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v1
-
-    - name: Login to DockerHub
-      uses: docker/login-action@v1 
-      with:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
-
-    - name: Get the version
-      id: get_version
-      run: echo ::set-output name=TAG_NAME::${GITHUB_REF/refs\/tags\//}
-
-    - name: Build and push docker image
-      id: docker_build
-      uses: docker/build-push-action@v2
-      with:
-        context: .
-        file: ./Dockerfile
-        platforms: linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
-        push: true
-        tags: ebrianne/duckdns-go:${{ steps.get_version.outputs.TAG_NAME }}
-
-  release:
+  create-release:
     runs-on: ubuntu-latest
     needs: test
+    permissions:
+      contents: write
     steps:
-      - name: Create release
-        id: create
-        uses: actions/create-release@v1
+      - uses: actions/checkout@v4
+      - name: Create GitHub release
+        run: gh release create "$GITHUB_REF_NAME" --generate-notes
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: ${{ github.ref }}
-          draft: false
-          prerelease: false
-    outputs:
-      upload_url: ${{ steps.create.outputs.upload_url }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   upload:
     runs-on: ubuntu-latest
-    needs: release
+    needs: create-release
+    permissions:
+      contents: write
     strategy:
       matrix:
         include:
-          - os: linux
-            arch: 386
-          - os: linux
-            arch: amd64
-          - os: linux
-            arch: arm
-          - os: linux
-            arch: arm64
-          - os: darwin
-            arch: amd64
-          - os: freebsd
-            arch: 386
-          - os: freebsd
-            arch: amd64
-          - os: windows
-            arch: 386
-            extension: '.exe'
-          - os: windows
-            arch: amd64
-            extension: '.exe'
+          - {os: linux,   arch: 386}
+          - {os: linux,   arch: amd64}
+          - {os: linux,   arch: arm}
+          - {os: linux,   arch: arm64}
+          - {os: darwin,  arch: amd64}
+          - {os: darwin,  arch: arm64}
+          - {os: freebsd, arch: 386}
+          - {os: freebsd, arch: amd64}
+          - {os: windows, arch: 386,   ext: .exe}
+          - {os: windows, arch: amd64, ext: .exe}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      
-      - uses: actions/setup-go@v2
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
         with:
-          go-version: 1.16
-
-      - name: Download go dependencies
-        run: go get -t -v ./...
-
-      - name: Install the needed vendors
-        run: GO111MODULE=on go mod vendor
-
-      - name: Create release (${{ matrix.os }}-${{ matrix.arch }})
-        run: CGO_ENABLED=0 GOOS=${{ matrix.os }} GOARCH=${{ matrix.arch }} go build -a -ldflags '-s -w' -o duckdns-go-${{ matrix.os }}-${{ matrix.arch }}${{ matrix.extension }} ./
-      
-      - name: Upload release assets
-        id: upload-release-asset
-        uses: actions/upload-release-asset@v1
+          go-version-file: go.mod
+      - name: Build
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.release.outputs.upload_url }}${{ matrix.extension }}
-          asset_path: ./duckdns-go-${{ matrix.os }}-${{ matrix.arch }}${{ matrix.extension }}
-          asset_name: duckdns-go-${{ matrix.os }}-${{ matrix.arch }}${{ matrix.extension }}
-          asset_content_type: application/octet-stream
+          CGO_ENABLED: '0'
+          GOOS: ${{ matrix.os }}
+          GOARCH: ${{ matrix.arch }}
+        run: go build -ldflags '-s -w' -o duckdns-go-${{ matrix.os }}-${{ matrix.arch }}${{ matrix.ext }} ./
+      - name: Upload binary to release
+        run: gh release upload "$GITHUB_REF_NAME" "duckdns-go-${{ matrix.os }}-${{ matrix.arch }}${{ matrix.ext }}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -2,13 +2,14 @@ package main
 
 import (
 	"context"
-	"k8s.io/klog"
 	"net/http"
 	"strings"
 	"time"
 
-	"github.com/ebrianne/duckdns-go/config"
-	"github.com/ebrianne/duckdns-go/duckdns"
+	"k8s.io/klog"
+
+	"github.com/cobexer/duckdns-go/config"
+	"github.com/cobexer/duckdns-go/duckdns"
 )
 
 const (
