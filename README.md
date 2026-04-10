@@ -81,3 +81,7 @@ export DUCKDNS_TOKEN="<your token>"
 export DUCKDNS_DOMAINS="domain1,domain2" #use space comma separated names
 ./duckdns-go
 ```
+
+## Attribution
+
+This project is based on work by [ebrianne](https://github.com/ebrianne) and [W0n9](https://github.com/W0n9).
