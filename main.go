@@ -8,8 +8,8 @@ import (
 
 	"k8s.io/klog"
 
-	"github.com/cobexer/duckdns-go/config"
-	"github.com/cobexer/duckdns-go/duckdns"
+	"github.com/cobexer/duckdns-go/v2/config"
+	"github.com/cobexer/duckdns-go/v2/duckdns"
 )
 
 const (
