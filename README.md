@@ -11,22 +11,16 @@ A golang client to update, clear ip and records for [DuckDNS](https://www.duckdn
 
 ### From sources
 
-You can download and build it from the sources. You have to retrieve the project sources by using one of the following way:
-```bash
-$ go get -u github.com/W0n9/duckdns-go
-# or
-$ git clone https://github.com/W0n9/duckdns-go.git
-```
+You can download and build it from the sources. You have to retrieve the project sources by cloning this repository, then, build the binary:
 
-Then, build the binary:
-```Powershell
-go build -ldflags '-s -w' -o duckdns-go.exe .
+```bash
+go build -ldflags '-s -w'
 ```
 
 ## Client Usage
 
-```Powershell
-.\duckdns-go.exe -duckdns_token <token> -duckdns_domains <domain> -update-ip 
+```bash
+./duckdns-go -duckdns_token <token> -duckdns_domains <domain> -update-ip 
 ```
 
 ```bash
@@ -45,6 +39,7 @@ I0113 11:17:15.064242  426646 client.go:96] Sending request to https://www.duckd
 I0113 11:17:15.940591  426646 main.go:71] Got response OK
 I0113 11:17:15.940629  426646 main.go:72] IP has been updated at 2021-01-13 11:17:15.940624102 +0100 CET m=+0.877805589
 ```
+
 ## Available CLI options
 
 ```bash
@@ -84,5 +79,5 @@ All CLI commands can be specified as an environment variable such as:
 ```bash
 export DUCKDNS_TOKEN="<your token>"
 export DUCKDNS_DOMAINS="domain1,domain2" #use space comma separated names
-duckdns
+./duckdns-go
 ```
