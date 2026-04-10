@@ -1,9 +1,14 @@
-module github.com/ebrianne/duckdns-go
+module github.com/cobexer/duckdns-go
 
-go 1.15
+go 1.26.0
 
 require (
 	github.com/heetch/confita v0.10.0
 	k8s.io/klog v1.0.0
 	k8s.io/klog/v2 v2.8.0
+)
+
+require (
+	github.com/go-logr/logr v0.4.0 // indirect
+	github.com/pkg/errors v0.8.1 // indirect
 )
