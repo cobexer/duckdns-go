@@ -84,6 +84,8 @@ github.com/hashicorp/yamux v0.0.0-20180604194846-3520598351bb/go.mod h1:+NfK9FKe
 github.com/hashicorp/yamux v0.0.0-20181012175058-2f1d1f20f75d/go.mod h1:+NfK9FKeTrX5uv1uIXGdwYDTeHna2qgaIlx54MXqjAM=
 github.com/heetch/confita v0.10.0 h1:00V4eQPDU71v9nZD7N/DsSb9cnPJh59CjrpQPfln47A=
 github.com/heetch/confita v0.10.0/go.mod h1:W6GDCVPvi2LpvdEriwZTu2fyxuK+Grx1vY302gtWfvM=
+github.com/heetch/confita v0.11.0 h1:Jma97Do07Yztbl92GhJ2Xvz2c/WNOib6hU+whUWNMWw=
+github.com/heetch/confita v0.11.0/go.mod h1:0tyQWTn3vsRemWdwxEmIlB7mRk2nTnXvxj5QtcEEpTE=
 github.com/jmespath/go-jmespath v0.0.0-20180206201540-c2b33e8439af/go.mod h1:Nht3zPeWKUH0NzdCt2Blrr5ys8VGpn0CEB0cQHVjt7k=
 github.com/jonboulle/clockwork v0.1.0/go.mod h1:Ii8DK3G1RaLaWxj9trq07+26W01tbo22gdxWY5EU2bo=
 github.com/julienschmidt/httprouter v1.2.0/go.mod h1:SYymIcj16QtmaHHD7aYtjjsJG7VTCxuUUipMqKk8s4w=
