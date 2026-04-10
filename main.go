@@ -12,10 +12,6 @@ import (
 	"github.com/cobexer/duckdns-go/v2/duckdns"
 )
 
-const (
-	name = "duckdns-client"
-)
-
 var (
 	c      *config.ClientConfig
 	client *duckdns.Client
