@@ -4,7 +4,7 @@ go 1.26.0
 
 require (
 	github.com/heetch/confita v0.11.0
-	k8s.io/klog v1.0.0
+	k8s.io/klog/v2 v2.140.0
 	k8s.io/klog/v2 v2.140.0
 )
 
